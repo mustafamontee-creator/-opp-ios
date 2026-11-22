@@ -25,8 +25,6 @@ jobs:
           fi
           PROJECT_DIR="$(dirname "$INDEX_PATH")"
           cp -R "$PROJECT_DIR"/. www/
-          echo "Web project copied from $PROJECT_DIR"
-          ls -la www
 
       - name: Create Capacitor project configuration
         run: |
@@ -54,12 +52,14 @@ jobs:
 
       - name: Build app
         run: |
-          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -derivedDataPath ios/DerivedData CODE_SIGNING_ALLOWED=NO build
 
       - name: Package IPA
         run: |
+          APP_PATH="ios/DerivedData/Build/Products/Release-iphoneos/App.app"
+          test -d "$APP_PATH"
           mkdir -p Payload
-          cp -R ios/App/build/Build/Products/Release-iphoneos/App.app Payload/
+          cp -R "$APP_PATH" Payload/
           zip -qr Opp.ipa Payload
 
       - uses: actions/upload-artifact@v4
